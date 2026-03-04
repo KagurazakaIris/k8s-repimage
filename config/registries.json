@@ -1,9 +1,9 @@
 {
-  "docker.io": "registry-1.docker.io",
-  "quay.io": "quay.io",
-  "gcr.io": "gcr.io",
-  "k8s.gcr.io": "k8s.gcr.io",
-  "registry.k8s.io": "registry.k8s.io",
-  "ghcr.io": "ghcr.io",
-  "docker.cloudsmith.io": "docker.cloudsmith.io"
+  "docker.io": "docker.utilapi.bid",
+  "quay.io": "quay.utilapi.bid",
+  "gcr.io": "gcr.utilapi.bid",
+  "k8s.gcr.io": "k8s-gcr.utilapi.bid",
+  "registry.k8s.io": "k8s.utilapi.bid",
+  "ghcr.io": "ghcr.utilapi.bid",
+  "docker.cloudsmith.io": "cloudsmith.utilapi.bid"
 }

@@ -8,7 +8,7 @@
 # 快速上手
 ## 安装
 ```shell
-kubectl create -f https://files.m.daocloud.io/github.com/wzshiming/repimage/releases/download/latest/repimage.yaml
+kubectl create -f https://cdn.jsdelivr.net/gh/KagurazakaIris/k8s-repimage@refs/heads/main/repimage.yaml
 kubectl rollout status deployment/repimage -n kube-system
 ```
 
