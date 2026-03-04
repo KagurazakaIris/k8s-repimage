@@ -34,7 +34,7 @@ spec:
       containers:
       - command:
         - /repimage
-        image: m.daocloud.io/ghcr.io/kagurazakairis/k8s-repimage:main
+        image: ghcr.io/kagurazakairis/k8s-repimage:main
         imagePullPolicy: IfNotPresent
         name: webhook
         ports:
