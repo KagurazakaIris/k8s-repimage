@@ -17,6 +17,30 @@ func TestReplaceImageName(t *testing.T) {
 		want string
 	}{
 		{
+			name: "mapping overrides docker.io for single-name image",
+			args: args{
+				prefix:        "m.daocloud.io",
+				name:          "nginx",
+				ignoreDomains: nil,
+				mappings: map[string]string{
+					"docker.io": "docker.utilapi.bid",
+				},
+			},
+			want: "docker.utilapi.bid/library/nginx",
+		},
+		{
+			name: "mapping overrides docker.io for org/image form",
+			args: args{
+				prefix:        "m.daocloud.io",
+				name:          "kubernetesui/dashboard:v2.7.0",
+				ignoreDomains: nil,
+				mappings: map[string]string{
+					"docker.io": "docker.utilapi.bid",
+				},
+			},
+			want: "docker.utilapi.bid/kubernetesui/dashboard:v2.7.0",
+		},
+		{
 			name: "ignore docker.io - single name",
 			args: args{
 				prefix:        "m.daocloud.io",

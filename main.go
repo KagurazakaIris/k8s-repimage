@@ -19,8 +19,33 @@ var (
 	key           = flag.String("key", "./certs/serverKey.pem", "Path to TLS key file")
 	prefix        = flag.String("prefix", "m.daocloud.io", "Image mirror prefix")
 	ignoreDomains = flag.String("ignore-domains", "", "Comma-separated list of domains to ignore (not replace)")
-	configPath    = flag.String("config", "./config/registries.json", "Path to registry mapping config (JSON)")
+	// Prefer a stable absolute path in the container image.
+	// (Dockerfile bakes the default file into /etc/repimage/registries.json)
+	configPath = flag.String("config", "/etc/repimage/registries.json", "Path to registry mapping config (JSON)")
 )
+
+func loadRegistryMappings(path string) map[string]string {
+	mappings := map[string]string{}
+	if path == "" {
+		klog.Info("registry mapping config path is empty, skip loading")
+		return mappings
+	}
+	if _, err := os.Stat(path); err != nil {
+		klog.Infof("registry mapping config not found at %q: %v (will fall back to --prefix behavior)", path, err)
+		return mappings
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		klog.Warningf("failed to read registry mapping config %q: %v (will fall back to --prefix behavior)", path, err)
+		return mappings
+	}
+	if err := json.Unmarshal(data, &mappings); err != nil {
+		klog.Warningf("failed to parse registry mapping config %q: %v (will fall back to --prefix behavior)", path, err)
+		return map[string]string{}
+	}
+	klog.Infof("loaded %d registry mappings from %q", len(mappings), path)
+	return mappings
+}
 
 func serve(w http.ResponseWriter, r *http.Request, prefix string, ignoreDomains []string) {
 	klog.Infof("request URI: %s", r.RequestURI)
@@ -47,14 +72,7 @@ func serve(w http.ResponseWriter, r *http.Request, prefix string, ignoreDomains 
 		resAdmissionReview.Response = utils.ToAdmissionResponse(err)
 	} else {
 		// load registry mapping earlier and pass into AdmitPods
-		mappings := map[string]string{}
-		if _, err := os.Stat(*configPath); err == nil {
-			data, err := os.ReadFile(*configPath)
-			if err == nil {
-				_ = json.Unmarshal(data, &mappings)
-			}
-		}
-
+		mappings := loadRegistryMappings(*configPath)
 		resAdmissionReview.Response = utils.AdmitPods(prefix, ignoreDomains, mappings, reqAdmissionReview)
 	}
 
