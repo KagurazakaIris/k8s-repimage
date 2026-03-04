@@ -8,6 +8,7 @@ func TestReplaceImageName(t *testing.T) {
 	type args struct {
 		prefix        string
 		ignoreDomains []string
+		mappings      map[string]string
 		name          string
 	}
 	tests := []struct {
@@ -21,6 +22,7 @@ func TestReplaceImageName(t *testing.T) {
 				prefix:        "m.daocloud.io",
 				name:          "nginx",
 				ignoreDomains: []string{"docker.io"},
+				mappings:      map[string]string{},
 			},
 			want: "docker.io/library/nginx",
 		},
@@ -30,6 +32,7 @@ func TestReplaceImageName(t *testing.T) {
 				prefix:        "m.daocloud.io",
 				name:          "user/nginx:v1.1.1",
 				ignoreDomains: []string{"docker.io"},
+				mappings:      map[string]string{},
 			},
 			want: "docker.io/user/nginx:v1.1.1",
 		},
@@ -39,6 +42,7 @@ func TestReplaceImageName(t *testing.T) {
 				prefix:        "m.daocloud.io",
 				name:          "k8s.gcr.io/user/nginx:v1.1.1",
 				ignoreDomains: []string{"k8s.gcr.io"},
+				mappings:      map[string]string{},
 			},
 			want: "k8s.gcr.io/user/nginx:v1.1.1",
 		},
@@ -48,6 +52,7 @@ func TestReplaceImageName(t *testing.T) {
 				prefix:        "m.daocloud.io",
 				name:          "k8s.gcr.io/user/nginx:v1.1.1",
 				ignoreDomains: []string{"gcr.io"},
+				mappings:      map[string]string{},
 			},
 			want: "m.daocloud.io/k8s.gcr.io/user/nginx:v1.1.1",
 		},
@@ -57,6 +62,7 @@ func TestReplaceImageName(t *testing.T) {
 				prefix:        "m.daocloud.io",
 				name:          "nginx",
 				ignoreDomains: []string{"docker.io", "k8s.gcr.io"},
+				mappings:      map[string]string{},
 			},
 			want: "docker.io/library/nginx",
 		},
@@ -66,6 +72,7 @@ func TestReplaceImageName(t *testing.T) {
 				prefix:        "m.daocloud.io",
 				name:          "k8s.gcr.io/nginx",
 				ignoreDomains: []string{"docker.io", "k8s.gcr.io"},
+				mappings:      map[string]string{},
 			},
 			want: "k8s.gcr.io/nginx",
 		},
@@ -75,6 +82,7 @@ func TestReplaceImageName(t *testing.T) {
 				prefix:        "m.daocloud.io",
 				name:          "quay.io/nginx",
 				ignoreDomains: []string{"docker.io", "k8s.gcr.io"},
+				mappings:      map[string]string{},
 			},
 			want: "m.daocloud.io/quay.io/nginx",
 		},
@@ -84,6 +92,7 @@ func TestReplaceImageName(t *testing.T) {
 				prefix:        "m.daocloud.io",
 				name:          "nginx",
 				ignoreDomains: nil,
+				mappings:      map[string]string{},
 			},
 			want: "m.daocloud.io/docker.io/library/nginx",
 		},
@@ -93,6 +102,7 @@ func TestReplaceImageName(t *testing.T) {
 				prefix:        "m.daocloud.io",
 				name:          "nginx",
 				ignoreDomains: []string{},
+				mappings:      map[string]string{},
 			},
 			want: "m.daocloud.io/docker.io/library/nginx",
 		},
@@ -102,6 +112,7 @@ func TestReplaceImageName(t *testing.T) {
 				prefix:        "m.daocloud.io",
 				name:          "myregistry.example.com/myimage:latest",
 				ignoreDomains: []string{"myregistry.example.com"},
+				mappings:      map[string]string{},
 			},
 			want: "myregistry.example.com/myimage:latest",
 		},
@@ -111,6 +122,7 @@ func TestReplaceImageName(t *testing.T) {
 				prefix:        "m.daocloud.io",
 				name:          "nginx",
 				ignoreDomains: []string{"quay.io"},
+				mappings:      map[string]string{},
 			},
 			want: "m.daocloud.io/docker.io/library/nginx",
 		},
@@ -120,6 +132,7 @@ func TestReplaceImageName(t *testing.T) {
 				prefix:        "m.daocloud.io",
 				name:          "registry-1.docker.io/myuser/myimage:tag",
 				ignoreDomains: []string{"docker.io"},
+				mappings:      map[string]string{},
 			},
 			want: "docker.io/myuser/myimage:tag",
 		},
@@ -129,6 +142,7 @@ func TestReplaceImageName(t *testing.T) {
 				prefix:        "m.daocloud.io",
 				name:          "nginx",
 				ignoreDomains: []string{"docker.io"},
+				mappings:      map[string]string{},
 			},
 			want: "docker.io/library/nginx",
 		},
@@ -138,6 +152,7 @@ func TestReplaceImageName(t *testing.T) {
 				prefix:        "m.daocloud.io",
 				name:          "user/nginx:v1.1.1",
 				ignoreDomains: []string{"docker.io"},
+				mappings:      map[string]string{},
 			},
 			want: "docker.io/user/nginx:v1.1.1",
 		},
@@ -147,6 +162,7 @@ func TestReplaceImageName(t *testing.T) {
 				prefix:        "m.daocloud.io",
 				name:          "nginx",
 				ignoreDomains: []string{"docker.io", "k8s.gcr.io"},
+				mappings:      map[string]string{},
 			},
 			want: "docker.io/library/nginx",
 		},
@@ -154,7 +170,7 @@ func TestReplaceImageName(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ReplaceImageName(tt.args.prefix, tt.args.ignoreDomains, tt.args.name); got != tt.want {
+			if got := ReplaceImageName(tt.args.prefix, tt.args.ignoreDomains, tt.args.mappings, tt.args.name); got != tt.want {
 				t.Errorf("ReplaceImageName() = %v, want %v", got, tt.want)
 			}
 		})

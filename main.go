@@ -5,6 +5,7 @@ import (
 	"flag"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/wzshiming/repimage/pkg/utils"
@@ -18,6 +19,7 @@ var (
 	key           = flag.String("key", "./certs/serverKey.pem", "Path to TLS key file")
 	prefix        = flag.String("prefix", "m.daocloud.io", "Image mirror prefix")
 	ignoreDomains = flag.String("ignore-domains", "", "Comma-separated list of domains to ignore (not replace)")
+	configPath    = flag.String("config", "./config/registries.json", "Path to registry mapping config (JSON)")
 )
 
 func serve(w http.ResponseWriter, r *http.Request, prefix string, ignoreDomains []string) {
@@ -44,7 +46,16 @@ func serve(w http.ResponseWriter, r *http.Request, prefix string, ignoreDomains 
 		klog.Error(err)
 		resAdmissionReview.Response = utils.ToAdmissionResponse(err)
 	} else {
-		resAdmissionReview.Response = utils.AdmitPods(prefix, ignoreDomains, reqAdmissionReview)
+		// load registry mapping earlier and pass into AdmitPods
+		mappings := map[string]string{}
+		if _, err := os.Stat(*configPath); err == nil {
+			data, err := os.ReadFile(*configPath)
+			if err == nil {
+				_ = json.Unmarshal(data, &mappings)
+			}
+		}
+
+		resAdmissionReview.Response = utils.AdmitPods(prefix, ignoreDomains, mappings, reqAdmissionReview)
 	}
 
 	resAdmissionReview.Response.UID = reqAdmissionReview.Request.UID

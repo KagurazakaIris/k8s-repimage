@@ -1,0 +1,9 @@
+{
+  "docker.io": "registry-1.docker.io",
+  "quay.io": "quay.io",
+  "gcr.io": "gcr.io",
+  "k8s.gcr.io": "k8s.gcr.io",
+  "registry.k8s.io": "registry.k8s.io",
+  "ghcr.io": "ghcr.io",
+  "docker.cloudsmith.io": "docker.cloudsmith.io"
+}
